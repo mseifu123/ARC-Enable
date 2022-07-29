@@ -1,0 +1,18 @@
+
+#[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls, [Net.SecurityProtocolType]::Tls11, [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3
+#[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"
+# Add the service principal application ID and secret here
+$servicePrincipalClientId="98afbbd6-3ec6-4882-9901-db4523cc96da"
+$servicePrincipalSecret="UyC7Q~LuzovTv5lPnHwTpKlWwP-vaZQ711_pf"
+# Download the installation package
+Invoke-WebRequest -Uri "https://aka.ms/azcmagent-windows" -TimeoutSec 30 -OutFile "$env:TEMP\install_windows_azcmagent.ps1"
+# Install the hybrid agent
+& "$env:TEMP\install_windows_azcmagent.ps1"
+if($LASTEXITCODE -ne 0) {
+    throw "Failed to install the hybrid agent"
+}
+# Run connect command
+& "$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" connect --service-principal-id "$servicePrincipalClientId" --service-principal-secret "$servicePrincipalSecret"`
+ --resource-group "On-Premise" --tenant-id "02ac0c07-b75f-46bf-9b13-3630ba94bb69" --location "eastus"`
+  --subscription-id "c99494c5-e512-41dc-9197-e8255578cb6b" --cloud "AzureCloud" --correlation-id "0b98de95-3668-476b-8625-32bfa7f37034"
+if($LastExitCode -eq 0){Write-Host -ForegroundColor yellow "To view your onboarded server(s), navigate to https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.HybridCompute%2Fmachines"}
